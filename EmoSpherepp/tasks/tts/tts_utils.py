@@ -1,4 +1,6 @@
 import importlib
+import glob
+import os
 import torch
 
 from data_gen.tts.base_binarizer import BaseBinarizer
@@ -9,19 +11,48 @@ from utils.commons.hparams import hparams, set_hparams
 
 class VocoderInfer:
     def __init__(self, hparams):
-
-        config_path = hparams["vocoder_config"]
+        vocoder_name = hparams.get("vocoder", "BigVGAN")
+        config_path = hparams.get("vocoder_config")
+        if config_path is None:
+            if vocoder_name.lower() == "bigvgan":
+                config_path = "configs/models/vocoder/bigvgan_16k.yaml"
+            elif vocoder_name.lower() == "hifigan":
+                config_path = "configs/models/vocoder/hifigan.yaml"
+            else:
+                raise KeyError("vocoder_config")
         self.config = config = set_hparams(config_path, global_hparams=False)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        pkg = ".".join(hparams["vocoder_cls"].split(".")[:-1])
-        cls_name = hparams["vocoder_cls"].split(".")[-1]
+        vocoder_cls = hparams.get("vocoder_cls")
+        if vocoder_cls is None:
+            if vocoder_name.lower() == "bigvgan":
+                vocoder_cls = "models.vocoder.bigvgan.BigVGAN"
+            elif vocoder_name.lower() == "hifigan":
+                vocoder_cls = "models.vocoder.hifigan.HiFiGAN"
+            else:
+                raise KeyError("vocoder_cls")
+        pkg = ".".join(vocoder_cls.split(".")[:-1])
+        cls_name = vocoder_cls.split(".")[-1]
         vocoder = getattr(importlib.import_module(pkg), cls_name)
         self.model = vocoder(config)
 
-        checkpoint_dict = torch.load(hparams["vocoder_ckpt"], map_location=self.device)
+        ckpt_path = hparams["vocoder_ckpt"]
+        if os.path.isdir(ckpt_path):
+            ckpt_candidates = sorted(
+                glob.glob(os.path.join(ckpt_path, "g_*")),
+                key=lambda x: os.path.basename(x),
+            )
+            if len(ckpt_candidates) == 0:
+                raise FileNotFoundError(
+                    f"No vocoder checkpoint found under directory: {ckpt_path}"
+                )
+            ckpt_path = ckpt_candidates[-1]
+        checkpoint_dict = torch.load(ckpt_path, map_location=self.device)
 
-        self.model.load_state_dict(checkpoint_dict["generator"])
+        if isinstance(checkpoint_dict, dict) and "generator" in checkpoint_dict:
+            self.model.load_state_dict(checkpoint_dict["generator"])
+        else:
+            self.model.load_state_dict(checkpoint_dict)
         self.model.to(self.device)
         self.model.eval()
 
