@@ -24,7 +24,7 @@ np.seterr(divide='ignore', invalid='ignore')
 
 import torch
 import torch.nn as nn
-from transformers import Wav2Vec2Processor
+from transformers import Wav2Vec2FeatureExtractor
 from transformers.models.wav2vec2.modeling_wav2vec2 import (
     Wav2Vec2Model,
     Wav2Vec2PreTrainedModel,
@@ -228,7 +228,7 @@ class BaseBinarizer:
         #######################
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model_name = 'audeering/wav2vec2-large-robust-12-ft-emotion-msp-dim'
-        processor = Wav2Vec2Processor.from_pretrained(model_name)
+        processor = Wav2Vec2FeatureExtractor.from_pretrained(model_name)
         model = EmotionModel.from_pretrained(model_name)
         model.to(device)
         print("start")
