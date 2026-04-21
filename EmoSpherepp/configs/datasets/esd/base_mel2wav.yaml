@@ -1,0 +1,4 @@
+base_config: egs/egs_bases/tts/vocoder/base.yaml
+raw_data_dir: /mnt/workspace/hongchengxun/dataset/ESD_en
+processed_data_dir: /mnt/workspace/hongchengxun/dataset/processed/ESD_all
+binary_data_dir: ''
