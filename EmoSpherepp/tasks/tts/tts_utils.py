@@ -48,7 +48,7 @@ def parse_dataset_configs():
 
 
 def parse_mel_losses():
-    mel_losses = hparams["mel_losses"].split("|")
+    mel_losses = hparams.get("mel_losses", "l1").split("|")
     loss_and_lambda = {}
     for i, l in enumerate(mel_losses):
         if l == "":

@@ -1,5 +1,6 @@
 import argparse
 import os
+import sys
 import yaml
 
 from utils.os_utils import remove_file
@@ -129,8 +130,10 @@ def set_hparams(config='', exp_name='', hparams_str='', print_hparams=True, glob
     if print_hparams and global_print_hparams and global_hparams:
         print('| Hparams chains: ', config_chains)
         print('| Hparams: ')
+        use_color = sys.stdout.isatty() and os.getenv("NO_COLOR") is None
         for i, (k, v) in enumerate(sorted(hparams_.items())):
-            print(f"\033[;33;m{k}\033[0m: {v}, ", end="\n" if i % 5 == 4 else "")
+            k_show = f"\033[;33;m{k}\033[0m" if use_color else k
+            print(f"{k_show}: {v}, ", end="\n" if i % 5 == 4 else "")
         print("")
         global_print_hparams = False
     return hparams_

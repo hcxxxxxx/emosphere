@@ -215,7 +215,9 @@ class SpeechBaseTask(BaseTask):
 
     def build_tts_model(self):
         dict_size = len(self.token_encoder)
-        out_dims = self.hparams["out_dims"]
+        out_dims = self.hparams.get(
+            "out_dims", self.hparams.get("audio_num_mel_bins", 80)
+        )
         self.model = self.model(dict_size + 1, self.hparams, out_dims=out_dims)
 
     def build_scheduler(self, optimizer):

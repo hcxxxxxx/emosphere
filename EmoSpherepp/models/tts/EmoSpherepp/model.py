@@ -11,7 +11,17 @@ import random
 
 import torch
 import torch.nn.functional as F
-import monotonic_align
+try:
+    import monotonic_align
+except ImportError:
+    from monotonic_alignment_search import maximum_path as _mas_maximum_path
+
+    class _MonotonicAlignCompat:
+        @staticmethod
+        def maximum_path(value, mask):
+            return _mas_maximum_path(value, mask, implementation="cython")
+
+    monotonic_align = _MonotonicAlignCompat()
 from models.tts.EmoSpherepp.base import BaseModule
 from models.tts.EmoSpherepp.text_encoder import TextEncoder
 from models.tts.EmoSpherepp.flow_matching import CFM

@@ -11,6 +11,7 @@ librosa
 matplotlib
 modelscope
 montreal_forced_aligner
+monotonic-alignment-search
 nltk
 numba
 numpy

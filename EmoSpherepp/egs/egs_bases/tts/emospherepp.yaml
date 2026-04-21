@@ -36,6 +36,8 @@ mid_block_type: "transformer"
 up_block_type: "transformer"
 
 out_size: 64
+out_dims: 80
+mel_losses: l1
 
 lr: 0.0001
 scheduler: warmup # rsqrt|warmup|none|noam
