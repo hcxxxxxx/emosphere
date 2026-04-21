@@ -24,7 +24,8 @@ np.seterr(divide='ignore', invalid='ignore')
 
 import torch
 import torch.nn as nn
-from transformers import Wav2Vec2FeatureExtractor
+from huggingface_hub import hf_hub_download
+from transformers import Wav2Vec2Config, Wav2Vec2FeatureExtractor
 from transformers.models.wav2vec2.modeling_wav2vec2 import (
     Wav2Vec2Model,
     Wav2Vec2PreTrainedModel,
@@ -76,6 +77,17 @@ class EmotionModel(Wav2Vec2PreTrainedModel):
         logits = self.classifier(hidden_states)
 
         return hidden_states_all, hidden_states, logits
+
+
+def load_emotion_model(model_name):
+    config_path = hf_hub_download(repo_id=model_name, filename="config.json")
+    with open(config_path, "r", encoding="utf-8") as f:
+        config_dict = json.load(f)
+    if config_dict.get("vocab_size") is None:
+        # New huggingface_hub versions validate types strictly.
+        config_dict["vocab_size"] = 32
+    config = Wav2Vec2Config.from_dict(config_dict)
+    return EmotionModel.from_pretrained(model_name, config=config)
 
 class BinarizationError(Exception):
     pass
@@ -229,7 +241,7 @@ class BaseBinarizer:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         model_name = 'audeering/wav2vec2-large-robust-12-ft-emotion-msp-dim'
         processor = Wav2Vec2FeatureExtractor.from_pretrained(model_name)
-        model = EmotionModel.from_pretrained(model_name)
+        model = load_emotion_model(model_name)
         model.to(device)
         print("start")
         if prefix == "all":
