@@ -55,3 +55,28 @@ class WarmupSchedule(NoneSchedule):
         for param_group in self.optimizer.param_groups:
             param_group['lr'] = self.lr
         return self.lr
+
+
+class NoamSchedule(NoneSchedule):
+    """Transformer Noam schedule without hidden-size scaling.
+
+    Kept for backward compatibility with code paths that import NoamSchedule.
+    """
+    def __init__(self, optimizer, lr, warmup_updates):
+        self.optimizer = optimizer
+        self.constant_lr = self.lr = lr
+        self.warmup_updates = warmup_updates
+        for param_group in optimizer.param_groups:
+            param_group['lr'] = self.lr
+        self.step(0)
+
+    def step(self, num_updates):
+        # avoid division by zero and keep behavior stable at step 0
+        step = max(1, num_updates)
+        warmup = max(1, self.warmup_updates)
+        scale = min(step ** -0.5, step * (warmup ** -1.5))
+        # normalize by warmup^-0.5 so lr reaches constant_lr near warmup boundary
+        self.lr = max(self.constant_lr * scale * (warmup ** 0.5), 1e-7)
+        for param_group in self.optimizer.param_groups:
+            param_group['lr'] = self.lr
+        return self.lr
