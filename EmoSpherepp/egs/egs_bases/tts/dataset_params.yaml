@@ -23,7 +23,7 @@ preprocess_args:
   nsample_per_mfa_group: 1000
   # text process
   txt_processor: en
-  use_mfa: true
+  use_mfa: false
   with_phsep: true
   reset_phone_dict: true
   reset_word_dict: true

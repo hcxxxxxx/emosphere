@@ -1,4 +1,5 @@
 asteroid_filterbanks
+addict
 chardet
 Cython
 diffusers
@@ -36,3 +37,4 @@ webrtcvad
 praat-parselmouth
 conformer
 pesq
+pyworld

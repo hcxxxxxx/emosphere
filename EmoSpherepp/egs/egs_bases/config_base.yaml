@@ -45,7 +45,7 @@ rename_tmux: true
 #########
 CE_loss: false
 
-num_spk: 10
+num_spk: 20
 num_emo: 5
 
 use_spk_id: true

@@ -18,7 +18,7 @@ pe_scale: 1000
 
 use_spk_embed: false
 use_spk_id: true
-n_spks: 10
+n_spks: 20
 spk_emb_dim: 64
 
 solver: euler

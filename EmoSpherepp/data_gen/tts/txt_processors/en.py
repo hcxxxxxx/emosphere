@@ -3,6 +3,7 @@ import unicodedata
 
 from g2p_en import G2p
 from g2p_en.expand import normalize_numbers
+import nltk
 from nltk import pos_tag
 from nltk.tokenize import TweetTokenizer
 
@@ -16,7 +17,15 @@ class EnG2p(G2p):
     def __call__(self, text):
         # preprocessing
         words = EnG2p.word_tokenize(text)
-        tokens = pos_tag(words)  # tuples of (word, tag)
+        try:
+            tokens = pos_tag(words)  # tuples of (word, tag)
+        except LookupError:
+            for pkg in ["averaged_perceptron_tagger_eng", "averaged_perceptron_tagger"]:
+                try:
+                    nltk.download(pkg, quiet=True)
+                except Exception:
+                    pass
+            tokens = pos_tag(words)
 
         # steps
         prons = []
